@@ -1,4 +1,6 @@
 import pygame
+import sys
+from menu import main_menu #функция меню
 
 # Основен клас за героя
 class Player(pygame.sprite.Sprite):
@@ -37,31 +39,37 @@ class Enemy(pygame.sprite.Sprite):
         elif self.rect.y > player.rect.y:
             self.rect.y -= 2
 
-# Основен цикъл на играта
-pygame.init()
-screen = pygame.display.set_mode((800, 600))
-clock = pygame.time.Clock()
+# Основен цикъл на играта (ще го сложа във функция, заради менюто ;))
+def start_game():
+    pygame.init()
+    screen = pygame.display.set_mode((800, 600))
+    clock = pygame.time.Clock()
 
-player = Player()
-enemies = pygame.sprite.Group(Enemy(700, 300), Enemy(500, 200))
-all_sprites = pygame.sprite.Group(player, *enemies)
+    player = Player()
+    enemies = pygame.sprite.Group(Enemy(700, 300), Enemy(500, 200))
+    all_sprites = pygame.sprite.Group(player, *enemies)
 
-running = True
-while running:
-    keys = pygame.key.get_pressed()
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    running = True
+    while running:
+        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-    # Обновяване
-    player.update(keys)
-    enemies.update(player)
+        # Обновяване
+        player.update(keys)
+        enemies.update(player)
 
-    # Рендериране
-    screen.fill((0, 0, 0))
-    all_sprites.draw(screen)
-    pygame.display.flip()
+        # Рендериране
+        screen.fill((0, 0, 0))
+        all_sprites.draw(screen)
+        pygame.display.flip()
 
-    clock.tick(30)
+        clock.tick(30)
 
-pygame.quit()
+    pygame.quit()
+    sys.exit()
+
+#меню
+if __name__ == "__main__":
+    main_menu(start_game)
