@@ -61,6 +61,57 @@ def options_menu(screen):
         screen.fill(LIGHT_GREEN)
         draw_text("Options", font, DARK_GREEN, screen, 400, 100)
 
+        #Бутончета
+        video_button = pygame.Rect(300, 200, 200, 50)
+        audio_button = pygame.Rect(300, 300, 200, 50)
+        controls_button = pygame.Rect(300, 400, 200, 50)
+        back_button = pygame.Rect(300, 500, 200, 50)
+
+        pygame.draw.rect(screen, GREEN, video_button)
+        pygame.draw.rect(screen, GREEN, audio_button)
+        pygame.draw.rect(screen, GREEN, controls_button)
+        pygame.draw.rect(screen, GREEN, back_button)
+
+        draw_text("Video", button_font, DARK_GREEN, screen, 400, 225)
+        draw_text("Audio", button_font, DARK_GREEN, screen, 400, 325)
+        draw_text("Controls", button_font, DARK_GREEN, screen, 400, 425)
+        draw_text("Back", button_font, DARK_GREEN, screen, 400, 525)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if video_button.collidepoint(event.pos):
+                    video_menu(screen)  #Video
+                if back_button.collidepoint(event.pos):
+                    return  # Връща към главно меню
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return  # Връща към главно меню
+
+        pygame.display.update()
+
+def video_menu(screen):
+    fullscreen = False
+
+    while True:
+        screen.fill(LIGHT_GREEN)
+        draw_text("Video Settings", font, DARK_GREEN, screen, 400, 100)
+
+        # Текст за резолюцията
+        draw_text("Resolution: 800x600", button_font, DARK_GREEN, screen, 400, 200)
+
+        # Fullscreen текст и бутон
+        draw_text("Fullscreen:", button_font, DARK_GREEN, screen, 300, 300)
+        fullscreen_button = pygame.Rect(400, 275, 100, 50)
+        pygame.draw.rect(screen, GREEN, fullscreen_button)
+
+        # Текст ON/OFF
+        fullscreen_text = "ON" if fullscreen else "OFF"
+        draw_text(fullscreen_text, button_font, DARK_GREEN, screen, 450, 300)
+
+        # Back бутон
         back_button = pygame.Rect(300, 400, 200, 50)
         pygame.draw.rect(screen, GREEN, back_button)
         draw_text("Back", button_font, DARK_GREEN, screen, 400, 425)
@@ -69,8 +120,21 @@ def options_menu(screen):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if fullscreen_button.collidepoint(event.pos):
+                    fullscreen = not fullscreen  # Превключва ON/OFF
+                    if fullscreen:
+                        pygame.display.set_mode((800, 600), pygame.FULLSCREEN)
+                    else:
+                        pygame.display.set_mode((800, 600))
                 if back_button.collidepoint(event.pos):
-                    return  # Връща към главно меню
+                    return  # Връща към менюто "Options"
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return  # Връща към менюто "Options"
 
         pygame.display.update()
+
