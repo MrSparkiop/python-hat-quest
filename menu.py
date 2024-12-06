@@ -20,6 +20,9 @@ def draw_text(text, font, color, surface, x, y):
 # Главно меню
 def main_menu(start_game):
     pygame.init()
+
+    #fullscreen
+    is_fullscreen = False
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Hat Quest")
 
@@ -46,9 +49,9 @@ def main_menu(start_game):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if play_button.collidepoint(event.pos):
-                    start_game()  # Старт
+                    start_game(is_fullscreen)  # Старт
                 if options_button.collidepoint(event.pos):
-                    options_menu(screen)
+                    is_fullscreen = options_menu(screen, is_fullscreen) #запис
                 if quit_button.collidepoint(event.pos):
                     pygame.quit()
                     sys.exit()
@@ -56,7 +59,7 @@ def main_menu(start_game):
         pygame.display.update()
 
 # Опциите
-def options_menu(screen):
+def options_menu(screen, is_fullscreen):
     while True:
         screen.fill(LIGHT_GREEN)
         draw_text("Options", font, DARK_GREEN, screen, 400, 100)
@@ -83,17 +86,16 @@ def options_menu(screen):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if video_button.collidepoint(event.pos):
-                    video_menu(screen)  #Video
+                    is_fullscreen = video_menu(screen, is_fullscreen)  #Video
                 if back_button.collidepoint(event.pos):
-                    return  # Връща към главно меню
+                    return is_fullscreen # Връща към главно меню
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return  # Връща към главно меню
+                    return is_fullscreen # Връща към главно меню
 
         pygame.display.update()
 
-def video_menu(screen):
-    fullscreen = False
+def video_menu(screen, is_fullscreen):
 
     while True:
         screen.fill(LIGHT_GREEN)
@@ -108,7 +110,7 @@ def video_menu(screen):
         pygame.draw.rect(screen, GREEN, fullscreen_button)
 
         # Текст ON/OFF
-        fullscreen_text = "ON" if fullscreen else "OFF"
+        fullscreen_text = "ON" if is_fullscreen else "OFF"
         draw_text(fullscreen_text, button_font, DARK_GREEN, screen, 450, 300)
 
         # Back бутон
@@ -124,17 +126,17 @@ def video_menu(screen):
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if fullscreen_button.collidepoint(event.pos):
-                    fullscreen = not fullscreen  # Превключва ON/OFF
-                    if fullscreen:
-                        pygame.display.set_mode((800, 600), pygame.FULLSCREEN)
+                    is_fullscreen = not is_fullscreen  # Превключва ON/OFF
+                    if is_fullscreen:
+                        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
                     else:
-                        pygame.display.set_mode((800, 600))
+                        screen = pygame.display.set_mode((800, 600))
                 if back_button.collidepoint(event.pos):
-                    return  # Връща към менюто "Options"
+                    return is_fullscreen # Връща към менюто "Options"
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return  # Връща към менюто "Options"
+                    return is_fullscreen # Връща към менюто "Options"
 
         pygame.display.update()
 

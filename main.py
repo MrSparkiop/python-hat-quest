@@ -40,9 +40,12 @@ class Enemy(pygame.sprite.Sprite):
             self.rect.y -= 2
 
 # Основен цикъл на играта (ще го сложа във функция, заради менюто ;))
-def start_game():
-    pygame.init()
-    screen = pygame.display.set_mode((800, 600))
+def start_game(is_fullscreen):
+    if is_fullscreen:
+        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)  # За fullscreen
+    else:
+        screen = pygame.display.set_mode((800, 600))  # За нормален екран
+
     clock = pygame.time.Clock()
 
     player = Player()
