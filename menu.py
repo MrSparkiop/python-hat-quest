@@ -109,11 +109,13 @@ def options_menu(screen, is_fullscreen):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if video_button.collidepoint(event.pos):
                     is_fullscreen = video_menu(screen, is_fullscreen)  # Video
+                if audio_button.collidepoint(event.pos):
+                    audio_menu(screen)  # Audio
                 if back_button.collidepoint(event.pos):
-                    return is_fullscreen  # Връща към главно меню
+                    return is_fullscreen  # Връща към главното меню
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return is_fullscreen  # Връща към главно меню
+                    return is_fullscreen  # Връща към главното меню
 
         pygame.display.update()
 
@@ -176,4 +178,73 @@ def video_menu(screen, is_fullscreen):
 
         pygame.display.update()
 
+def audio_menu(screen):
+    # Стойност на звука (по подразбиране е 50)
+    volume = 50
+    dragging = False  # Флаг за движение на плъзгача
 
+    while True:
+        screen_width, screen_height = screen.get_size()  # Размер на екрана
+
+        # Динамично позициониране
+        title_y = screen_height // 6
+        slider_label_y = screen_height // 3
+        slider_y = slider_label_y + 50
+        slider_width, slider_height = 300, 20
+        slider_x = (screen_width - slider_width) // 2
+        handle_width, handle_height = 20, 40
+        handle_x = slider_x + (volume / 100) * slider_width - handle_width // 2
+        handle_y = slider_y - (handle_height - slider_height) // 2
+        back_button_width, back_button_height = 200, 50
+        back_button_x = (screen_width - back_button_width) // 2
+        back_button_y = screen_height // 2 + 100
+
+        # Рендиране
+        screen.fill(LIGHT_GREEN)
+        draw_text("Audio Settings", font, DARK_GREEN, screen, screen_width // 2, title_y)
+
+        # Текст и слайдър за звука
+        draw_text(f"Volume: {volume}", button_font, DARK_GREEN, screen, screen_width // 2, slider_label_y)
+        pygame.draw.rect(screen, DARK_GREEN, (slider_x, slider_y, slider_width, slider_height))  # Slider background
+        pygame.draw.rect(screen, GREEN, (handle_x, handle_y, handle_width, handle_height))  # Slider handle
+
+        # Back бутон
+        back_button = pygame.Rect(back_button_x, back_button_y, back_button_width, back_button_height)
+        pygame.draw.rect(screen, GREEN, back_button)
+        draw_text("Back", button_font, DARK_GREEN, screen, screen_width // 2, back_button_y + back_button_height // 2)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            # Натискане на мишката
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if back_button.collidepoint(event.pos):
+                    return
+                # Проверка дали манипулаторът е натиснат
+                if handle_x <= event.pos[0] <= handle_x + handle_width and handle_y <= event.pos[1] <= handle_y + handle_height:
+                    dragging = True
+                # Проверка дали слайдърът е натиснат
+                if slider_x <= event.pos[0] <= slider_x + slider_width and slider_y <= event.pos[1] <= slider_y + slider_height:
+                    volume = int((event.pos[0] - slider_x) / slider_width * 100)
+
+            # Пускане на мишката
+            if event.type == pygame.MOUSEBUTTONUP:
+                dragging = False
+
+            # Движение на мишката
+            if event.type == pygame.MOUSEMOTION:
+                if dragging:
+                    # Промяна на стойността на плъзгача спрямо движението
+                    mouse_x = event.pos[0]
+                    volume = int((mouse_x - slider_x) / slider_width * 100)
+                    # Ограничаване на обхвата до 0-100
+                    volume = max(0, min(volume, 100))
+
+            #Escape
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return  # Връща към менюто "Options"
+
+        pygame.display.update()
