@@ -111,14 +111,16 @@ def options_menu(screen, is_fullscreen):
                     is_fullscreen = video_menu(screen, is_fullscreen)  # Video
                 if audio_button.collidepoint(event.pos):
                     audio_menu(screen)  # Audio
+                if controls_button.collidepoint(event.pos):
+                    controls_menu(screen)  # Controls
                 if back_button.collidepoint(event.pos):
                     return is_fullscreen  # Връща към главното меню
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return is_fullscreen  # Връща към главното меню
 
         pygame.display.update()
-
 
 def video_menu(screen, is_fullscreen):
     while True:
@@ -246,5 +248,51 @@ def audio_menu(screen):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return  # Връща към менюто "Options"
+
+        pygame.display.update()
+
+def controls_menu(screen):
+    while True:
+        screen_width, screen_height = screen.get_size()  # Размер на екрана
+
+        # Динамично позициониране
+        title_y = screen_height // 6
+        text_start_y = screen_height // 3
+        text_line_spacing = 40
+        back_button_width, back_button_height = 200, 50
+        back_button_x = (screen_width - back_button_width) // 2
+        back_button_y = screen_height - 100
+
+        # Рендиране
+        screen.fill(LIGHT_GREEN)
+        draw_text("Controls", font, DARK_GREEN, screen, screen_width // 2, title_y)
+
+        # Текст за контролите
+        controls_text = [
+            "Move Up: Arrow Up",
+            "Move Down: Arrow Down",
+            "Move Left: Arrow Left",
+            "Move Right: Arrow Right",
+            "Pause: Escape"
+        ]
+        for i, line in enumerate(controls_text):
+            draw_text(line, button_font, DARK_GREEN, screen, screen_width // 2, text_start_y + i * text_line_spacing)
+
+        # Back бутон
+        back_button = pygame.Rect(back_button_x, back_button_y, back_button_width, back_button_height)
+        pygame.draw.rect(screen, GREEN, back_button)
+        draw_text("Back", button_font, DARK_GREEN, screen, screen_width // 2, back_button_y + back_button_height // 2)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if back_button.collidepoint(event.pos):
+                    return  # Връщане към менюто "Options"
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return  # Връщане към менюто "Options"
 
         pygame.display.update()
