@@ -30,7 +30,12 @@ def start_game(is_fullscreen):
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return
+                    return  # Back to menu
+
+            # Trigger Attack with Left Mouse Button
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button
+                    player.attack()  # Call the attack method
 
         # Update player
         all_sprites.update(keys, dt)

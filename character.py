@@ -1,7 +1,6 @@
 import pygame
 import os
 
-
 # Character Class for Animations
 class Character(pygame.sprite.Sprite):
     def __init__(self, position):
@@ -9,17 +8,12 @@ class Character(pygame.sprite.Sprite):
         # Load all animations
         self.animations = {
             "Attack_1": self.load_animation("Attack_1.png", 6),
-            "Attack_2": self.load_animation("Attack_2.png", 3),
-            "Attack_3": self.load_animation("Attack_3.png", 4),
-            "Dead": self.load_animation("Dead.png", 4),
-            "Hurt": self.load_animation("Hurt.png", 3),
             "Idle": self.load_animation("Idle.png", 8),
-            "Idle_2": self.load_animation("Idle_2.png", 3),
             "Jump": self.load_animation("Jump.png", 8),
-            "Run": self.load_animation("Run.png", 8),
             "Walk": self.load_animation("Walk.png", 8),
         }
 
+        # Default animation setup
         self.current_action = "Idle"
         self.images = self.animations[self.current_action]
         self.image_index = 0
@@ -36,6 +30,7 @@ class Character(pygame.sprite.Sprite):
         self.gravity = 0.5
         self.jump_force = -10
         self.is_jumping = False
+        self.is_attacking = False  # New: Track if currently attacking
 
     def load_animation(self, filename, frame_count):
         """ Load animation frames correctly from a sprite sheet """
@@ -47,21 +42,26 @@ class Character(pygame.sprite.Sprite):
         frame_width = sprite_sheet.get_width() // frame_count
         frame_height = sprite_sheet.get_height()
 
-        # Extract each frame without shifting or cropping
+        # Extract each frame
         for i in range(frame_count):
             frame = sprite_sheet.subsurface((i * frame_width, 0, frame_width, frame_height))
             frames.append(frame)
-
         return frames
 
     def set_action(self, action):
-        """ Switch animation only when the action changes """
+        """ Switch animation only when action changes """
         if action != self.current_action:
             self.current_action = action
             self.images = self.animations[action]
             self.image_index = 0  # Reset to the first frame
             self.image = self.images[self.image_index]
             self.time_elapsed = 0  # Reset animation timer
+
+    def attack(self):
+        """ Trigger attack animation """
+        if not self.is_attacking:
+            self.is_attacking = True
+            self.set_action("Attack_1")
 
     def apply_gravity(self):
         """ Apply gravity to the character """
@@ -72,7 +72,22 @@ class Character(pygame.sprite.Sprite):
             self.velocity.y = 0
 
     def update(self, keys, dt):
-        """ Update character movement and animation """
+        """ Update character movement, animations, and attacks """
+        # Handle attack animation
+        if self.is_attacking:
+            self.time_elapsed += dt
+            if self.time_elapsed >= self.animation_speed:
+                self.time_elapsed = 0
+                self.image_index += 1
+
+                if self.image_index >= len(self.images):  # Attack animation ends
+                    self.image_index = 0
+                    self.is_attacking = False
+                    self.set_action("Idle")
+                else:
+                    self.image = self.images[self.image_index]
+            return  # Skip further updates if attacking
+
         # Reset horizontal velocity
         self.velocity.x = 0
 
@@ -88,21 +103,17 @@ class Character(pygame.sprite.Sprite):
             self.is_jumping = True
             self.set_action("Jump")
         else:
-            # Switch to Idle if no keys are pressed and not jumping
-            if not self.is_jumping:
-                if self.current_action != "Idle":
-                    self.set_action("Idle")
-            # Ensure no movement in idle state
-            self.velocity.x = 0
+            if not self.is_jumping and self.current_action != "Idle":
+                self.set_action("Idle")
 
-            # Update position based on velocity
+        # Update position based on velocity
         self.rect.x += self.velocity.x
         self.rect.y += self.velocity.y
 
         # Apply gravity
         self.apply_gravity()
 
-        # Update animation frames
+        # Update animation frames if moving
         self.time_elapsed += dt
         if self.time_elapsed >= self.animation_speed:
             self.time_elapsed = 0
