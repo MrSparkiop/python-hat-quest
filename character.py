@@ -72,7 +72,7 @@ class Character(pygame.sprite.Sprite):
             self.velocity.y = 0
 
     def update(self, keys, dt):
-        """ Update character movement, animations, and attacks """
+        """ Update character movement, jumping, and attacks """
         # Handle attack animation
         if self.is_attacking:
             self.time_elapsed += dt
@@ -91,31 +91,42 @@ class Character(pygame.sprite.Sprite):
         # Reset horizontal velocity
         self.velocity.x = 0
 
-        # Movement controls
-        if keys[pygame.K_LEFT]:
-            self.velocity.x = -self.speed
-            self.set_action("Walk")
-        elif keys[pygame.K_RIGHT]:
-            self.velocity.x = self.speed
-            self.set_action("Walk")
-        elif keys[pygame.K_SPACE] and not self.is_jumping:  # Jumping
+        # Prioritize Jumping First
+        if keys[pygame.K_SPACE] and not self.is_jumping:
             self.velocity.y = self.jump_force
             self.is_jumping = True
             self.set_action("Jump")
+
+        # Handle Movement if Not Jumping
+        if keys[pygame.K_a]:  # Move left
+            self.velocity.x = -self.speed
+            if not self.is_jumping:
+                self.set_action("Walk")
+        elif keys[pygame.K_d]:  # Move right
+            self.velocity.x = self.speed
+            if not self.is_jumping:
+                self.set_action("Walk")
         else:
-            if not self.is_jumping and self.current_action != "Idle":
+            if not self.is_jumping:
                 self.set_action("Idle")
 
-        # Update position based on velocity
+        # Apply Gravity
+        self.velocity.y += self.gravity
+
+        # Update Position
         self.rect.x += self.velocity.x
         self.rect.y += self.velocity.y
 
-        # Apply gravity
-        self.apply_gravity()
+        # Check If on the Ground
+        if self.rect.bottom >= 300:  # Simulated ground level
+            self.rect.bottom = 300
+            self.is_jumping = False
+            self.velocity.y = 0
 
-        # Update animation frames if moving
+        # Update Animation Frames
         self.time_elapsed += dt
         if self.time_elapsed >= self.animation_speed:
             self.time_elapsed = 0
             self.image_index = (self.image_index + 1) % len(self.images)
             self.image = self.images[self.image_index]
+
