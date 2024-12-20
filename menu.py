@@ -27,10 +27,7 @@ def main_menu(start_game):
     pygame.display.set_caption("Hat Quest")
 
     while True:
-        # Размерите на екрана
         screen_width, screen_height = screen.get_size()
-
-        # Динамично позициониране
         title_y = screen_height // 6
         button_width, button_height = 200, 50
         button_x = (screen_width - button_width) // 2
@@ -269,11 +266,10 @@ def controls_menu(screen):
 
         # Текст за контролите
         controls_text = [
-            "Move Up: Arrow Up",
-            "Move Down: Arrow Down",
-            "Move Left: Arrow Left",
-            "Move Right: Arrow Right",
-            "Pause: Escape"
+            "Move Left: A",
+            "Move Right: D",
+            "Jump: Space",
+            "Back to menu: Escape"
         ]
         for i, line in enumerate(controls_text):
             draw_text(line, button_font, DARK_GREEN, screen, screen_width // 2, text_start_y + i * text_line_spacing)
@@ -294,5 +290,50 @@ def controls_menu(screen):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return  # Връщане към менюто "Options"
+
+        pygame.display.update()
+
+# Меню за пауза
+def pause_menu(screen):
+    is_fullscreen = pygame.display.get_surface().get_flags() & pygame.FULLSCREEN
+
+    while True:
+        screen_width, screen_height = screen.get_size()
+        button_width, button_height = 200, 50
+        button_x = (screen_width - button_width) // 2
+        resume_button_y = screen_height // 2 - 100
+        options_button_y = screen_height // 2
+        exit_button_y = screen_height // 2 + 100
+
+        screen.fill(LIGHT_GREEN)
+        draw_text("Paused", font, DARK_GREEN, screen, screen_width // 2, screen_height // 4.5)
+
+        resume_button = pygame.Rect(button_x, resume_button_y, button_width, button_height)
+        options_button = pygame.Rect(button_x, options_button_y, button_width, button_height)
+        exit_button = pygame.Rect(button_x, exit_button_y, button_width, button_height)
+
+        pygame.draw.rect(screen, GREEN, resume_button)
+        pygame.draw.rect(screen, GREEN, options_button)
+        pygame.draw.rect(screen, GREEN, exit_button)
+
+        draw_text("Resume", button_font, DARK_GREEN, screen, screen_width // 2, resume_button_y + button_height // 2)
+        draw_text("Options", button_font, DARK_GREEN, screen, screen_width // 2, options_button_y + button_height // 2)
+        draw_text("Exit", button_font, DARK_GREEN, screen, screen_width // 2, exit_button_y + button_height // 2)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if resume_button.collidepoint(event.pos):
+                    return "resume"
+                if options_button.collidepoint(event.pos):
+                    is_fullscreen = options_menu(screen, is_fullscreen)  # Пренасочване към менюто за опции
+                    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
+                if exit_button.collidepoint(event.pos):
+                    return "exit"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return "resume"
 
         pygame.display.update()

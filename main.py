@@ -1,15 +1,13 @@
 import pygame
 import sys
-from menu import main_menu
+import json
+from menu import main_menu, pause_menu, options_menu
 from character import Character
 from environment import Environment
+from save_system import save_game, load_game
 
 def start_game(is_fullscreen):
-    # Initialize screen
-    if is_fullscreen:
-        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    else:
-        screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Game Environment Demo")
 
     clock = pygame.time.Clock()
@@ -19,6 +17,11 @@ def start_game(is_fullscreen):
     environment = Environment(screen)
     all_sprites = pygame.sprite.Group(player)
 
+    # Зареждане на прогрес
+    progress = load_game()
+    if progress:
+        player.rect.topleft = progress.get("player_position", (100, 300))
+
     running = True
     while running:
         dt = clock.tick(60) / 1000
@@ -27,10 +30,18 @@ def start_game(is_fullscreen):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return  # Back to menu
+                    action = pause_menu(screen)
+                    if action == "resume":
+                        continue
+                    elif action == "options":
+                        is_fullscreen = options_menu(screen, is_fullscreen)
+                        screen = pygame.display.set_mode((0, 0),
+                        pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
+                    elif action == "exit":
+                        save_game({"player_position": player.rect.topleft})
+                        return
 
             # Trigger Attack with Left Mouse Button
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -42,8 +53,8 @@ def start_game(is_fullscreen):
 
         # Draw everything
         screen.fill((50, 50, 50))
-        environment.draw()  # Draw the environment first
-        all_sprites.draw(screen)  # Draw the player on top
+        environment.draw() # Draw the environment first
+        all_sprites.draw(screen) # Draw the player on top
         pygame.display.flip()
 
     pygame.quit()
