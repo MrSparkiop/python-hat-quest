@@ -1,6 +1,7 @@
 import pygame
 import os
 import random
+from npc import NPC
 
 class Environment:
     def __init__(self, screen):
@@ -18,6 +19,10 @@ class Environment:
 
         # Map to store randomized tile indices
         self.tile_map = self.generate_map()
+
+        # NPCs in the environment
+        self.npcs = pygame.sprite.Group()
+        self.add_npcs()
 
     def load_tiles(self):
         """ Load all tiles dynamically from the Asset folder """
@@ -45,6 +50,10 @@ class Environment:
             tile_map.append(tile_row)
         return tile_map
 
+    def add_npcs(self):
+        """ Add NPCs to the environment """
+        self.npcs.add(NPC((400, 200)))  # Add an NPC at position (400, 300)
+
     def draw(self):
         """ Draw the environment using the generated tile map """
         for row_idx, row in enumerate(self.tile_map):
@@ -53,3 +62,10 @@ class Environment:
                 x = col_idx * self.tile_size
                 y = row_idx * self.tile_size
                 self.screen.blit(tile, (x, y))
+
+        # Draw NPCs
+        self.npcs.draw(self.screen)
+
+    def update(self, dt):
+        """ Update NPCs in the environment """
+        self.npcs.update(dt)
