@@ -7,6 +7,9 @@ from character import Character
 from environment import Environment
 from save_system import save_game, load_game
 from dialog import dialog_screen, option_screen
+from level1 import start_level1
+from level2 import start_level2
+from level3 import start_level3
 
 def start_game(is_fullscreen):
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
@@ -49,8 +52,13 @@ def start_game(is_fullscreen):
                     for npc in environment.npcs:
                         if player.rect.colliderect(npc.rect):
                             dialog_screen(screen, "Hello, adventurer!")
-                            chosen_option = option_screen(screen, ["Option 1", "Option 2", "Option 3"])
-                            print(f"Chosen option: {chosen_option}")
+                            chosen_option = option_screen(screen, ["Level 1", "Level 2", "Level 3"])
+                            if chosen_option == "Level 1":
+                                start_level1(screen, player)
+                            elif chosen_option == "Level 2":
+                                start_level2(screen, player)
+                            elif chosen_option == "Level 3":
+                                start_level3(screen, player)
 
             # Trigger Attack with Left Mouse Button
             if event.type == pygame.MOUSEBUTTONDOWN:
