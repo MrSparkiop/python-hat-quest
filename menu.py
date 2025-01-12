@@ -329,3 +329,51 @@ def pause_menu(screen):
                     return "resume"
 
         pygame.display.update()
+
+
+# Level pause menu
+def level_pause_menu(screen):
+    """ Pause menu for levels """
+    while True:
+        screen_width, screen_height = screen.get_size()
+        button_width, button_height = 200, 50
+        button_x = (screen_width - button_width) // 2
+        resume_button_y = screen_height // 2 - 100
+        options_button_y = screen_height // 2
+        leave_button_y = screen_height // 2 + 100
+
+        screen.fill(LIGHT_GREEN)
+
+        # Title
+        draw_text("Paused", font, DARK_GREEN, screen, screen_width // 2, screen_height // 4.5)
+
+        # Buttons
+        resume_button = pygame.Rect(button_x, resume_button_y, button_width, button_height)
+        options_button = pygame.Rect(button_x, options_button_y, button_width, button_height)
+        leave_button = pygame.Rect(button_x, leave_button_y, button_width, button_height)
+
+        pygame.draw.rect(screen, GREEN, resume_button)
+        pygame.draw.rect(screen, GREEN, options_button)
+        pygame.draw.rect(screen, GREEN, leave_button)
+
+        draw_text("Resume", button_font, DARK_GREEN, screen, screen_width // 2, resume_button_y + button_height // 2)
+        draw_text("Options", button_font, DARK_GREEN, screen, screen_width // 2, options_button_y + button_height // 2)
+        draw_text("Leave Level", button_font, DARK_GREEN, screen, screen_width // 2,
+                  leave_button_y + button_height // 2)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if resume_button.collidepoint(event.pos):
+                    return "resume"
+                if options_button.collidepoint(event.pos):
+                    options_menu(screen, is_fullscreen=False)
+                if leave_button.collidepoint(event.pos):
+                    return "leave"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return "resume"
+
+        pygame.display.update()

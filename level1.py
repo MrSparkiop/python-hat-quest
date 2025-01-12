@@ -1,5 +1,6 @@
 import pygame
 import sys
+from menu import level_pause_menu  # Import pause menu
 
 def start_level1(screen, player, all_sprites):
     clock = pygame.time.Clock()
@@ -13,7 +14,11 @@ def start_level1(screen, player, all_sprites):
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return  # Return to main game/menu
+                    action = level_pause_menu(screen)
+                    if action == "resume":
+                        continue
+                    elif action == "leave":
+                        return
 
         # Update
         all_sprites.update(pygame.key.get_pressed(), dt)
