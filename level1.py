@@ -1,13 +1,9 @@
 import pygame
 import sys
 
-def start_level1(screen, player):
+def start_level1(screen, player, all_sprites):
     clock = pygame.time.Clock()
     running = True
-
-    # Set player position for level 1
-    player.rect.topleft = (100, 300)
-    all_sprites = pygame.sprite.Group(player)
 
     while running:
         dt = clock.tick(60) / 1000

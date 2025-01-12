@@ -2,7 +2,9 @@ import sys
 import pygame
 
 from menu import GREEN, DARK_GREEN, LIGHT_GREEN
-
+from level1 import start_level1
+from level2 import start_level2
+from level3 import start_level3
 
 def dialog_screen(screen, text):
     # Window for dialog
@@ -67,3 +69,21 @@ def option_screen(screen, options):
                 for button_rect, option in buttons:
                     if button_rect.collidepoint(event.pos):
                         return option
+
+def handle_npc_interaction(screen, player, npcs, all_sprites):
+    for npc in npcs:
+        if player.rect.colliderect(npc.rect):
+            dialog_screen(screen, "Hello, adventurer!")
+            dialog_screen(screen, "We need your help!")
+            dialog_screen(screen, "I will explain later, now...")
+            dialog_screen(screen, "Quick!")
+            dialog_screen(screen, "Go through the levels and defeat the BOSS!")
+
+            chosen_option = option_screen(screen, ["Level 1", "Level 2", "Level 3"])
+            if chosen_option == "Level 1":
+                start_level1(screen, player, all_sprites)
+            elif chosen_option == "Level 2":
+                start_level2(screen, player, all_sprites)
+            elif chosen_option == "Level 3":
+                start_level3(screen, player, all_sprites)
+

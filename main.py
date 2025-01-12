@@ -6,10 +6,7 @@ from menu import main_menu, pause_menu, options_menu, GREEN, LIGHT_GREEN, DARK_G
 from character import Character
 from environment import Environment
 from save_system import save_game, load_game
-from dialog import dialog_screen, option_screen
-from level1 import start_level1
-from level2 import start_level2
-from level3 import start_level3
+from dialog import handle_npc_interaction
 
 def start_game(is_fullscreen):
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
@@ -22,7 +19,7 @@ def start_game(is_fullscreen):
     environment = Environment(screen)
     all_sprites = pygame.sprite.Group(player)
 
-    # progress load
+    # Progress load
     progress = load_game()
     if progress:
         player.rect.topleft = progress.get("player_position", (100, 300))
@@ -44,40 +41,30 @@ def start_game(is_fullscreen):
                     elif action == "options":
                         is_fullscreen = options_menu(screen, is_fullscreen)
                         screen = pygame.display.set_mode((0, 0),
-                        pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
+                                                         pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
                     elif action == "exit":
                         save_game({"player_position": player.rect.topleft})
                         return
                 if event.key == pygame.K_e:
-                    for npc in environment.npcs:
-                        if player.rect.colliderect(npc.rect):
-                            dialog_screen(screen, "Hello, adventurer!")
-                            chosen_option = option_screen(screen, ["Level 1", "Level 2", "Level 3"])
-                            if chosen_option == "Level 1":
-                                start_level1(screen, player)
-                            elif chosen_option == "Level 2":
-                                start_level2(screen, player)
-                            elif chosen_option == "Level 3":
-                                start_level3(screen, player)
+                    handle_npc_interaction(screen, player, environment.npcs, all_sprites)
 
             # Trigger Attack with Left Mouse Button
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse button
                     player.attack()  # Call the attack method
 
-        #Update player and environment
+        # Update player and environment
         environment.update(dt)
         all_sprites.update(keys, dt)
 
-        #Draw everything
+        # Draw everything
         screen.fill((50, 50, 50))
         environment.draw()  # Draw the environment first
-        all_sprites.draw(screen)  # Draw the player and npc on top
+        all_sprites.draw(screen)  # Draw the player and NPCs on top
         pygame.display.flip()
 
     pygame.quit()
     sys.exit()
-
 
 if __name__ == "__main__":
     main_menu(start_game)
