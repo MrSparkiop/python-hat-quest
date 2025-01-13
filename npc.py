@@ -20,8 +20,12 @@ class NPC(pygame.sprite.Sprite):
         self.animation_speed = 0.2  # Time per frame in seconds
         self.time_elapsed = 0
 
+        # Movement and physics
+        self.velocity = pygame.Vector2(0, 0)
+        self.gravity = 0.5
+
     def load_animation(self, filename, frame_count):
-        #Load animation frames from sprite sheet
+        """Load animation frames from sprite sheet."""
         asset_folder = os.path.join("Asset", "npc", filename)
         sprite_sheet = pygame.image.load(asset_folder).convert_alpha()
         frames = []
@@ -37,7 +41,7 @@ class NPC(pygame.sprite.Sprite):
         return frames
 
     def set_action(self, action):
-        #Switch animation only when action changes
+        """Switch animation only when action changes."""
         if action != self.current_action:
             self.current_action = action
             self.images = self.animations[action]
@@ -45,9 +49,33 @@ class NPC(pygame.sprite.Sprite):
             self.image = self.images[self.image_index]
             self.time_elapsed = 0
 
+    def apply_gravity(self):
+        """Apply gravity to the NPC."""
+        screen_height = pygame.display.get_surface().get_height()
+        ground_level = screen_height - 100
+
+        # Check if NPC is already on the ground
+        if self.rect.bottom < ground_level:
+            self.velocity.y += self.gravity
+        else:
+            self.rect.bottom = ground_level
+            self.velocity.y = 0
+
     def update(self, dt):
+        """Update NPC animation and apply gravity."""
+        self.apply_gravity()  # Apply gravity before updating position
+        self.rect.y += self.velocity.y
+
+        # Update animation frames
         self.time_elapsed += dt
         if self.time_elapsed >= self.animation_speed:
             self.time_elapsed = 0
             self.image_index = (self.image_index + 1) % len(self.images)
             self.image = self.images[self.image_index]
+
+    def reposition(self):
+                """Reposition the NPC on the ground after screen resize."""
+                screen_height = pygame.display.get_surface().get_height()
+                ground_level = screen_height - 100
+                self.rect.bottom = ground_level
+                self.velocity.y = 0  # Reset vertical velocity

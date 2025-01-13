@@ -15,7 +15,7 @@ def start_game(is_fullscreen):
     clock = pygame.time.Clock()
 
     # Initialize the player and environment
-    player = Character((100, 300))
+    player = Character((screen.get_width() // 2 - 100, screen.get_height() - 100))
     environment = Environment(screen)
     all_sprites = pygame.sprite.Group(player)
 

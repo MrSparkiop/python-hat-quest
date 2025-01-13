@@ -65,14 +65,20 @@ class Character(pygame.sprite.Sprite):
 
     def apply_gravity(self):
         """ Apply gravity to the character """
+        screen_height = pygame.display.get_surface().get_height()  # Get current screen height
+        ground_level = screen_height - 100  # Dynamic ground level
+
         self.velocity.y += self.gravity
-        if self.rect.bottom >= 300:  # Simulated ground level
-            self.rect.bottom = 300
+        if self.rect.bottom >= ground_level:  # Check against dynamic ground level
+            self.rect.bottom = ground_level
             self.is_jumping = False
             self.velocity.y = 0
 
     def update(self, keys, dt):
         """ Update character movement, jumping, and attacks """
+        screen_height = pygame.display.get_surface().get_height()  # Get current screen height
+        ground_level = screen_height - 100  # Dynamic ground level
+
         # Handle attack animation
         if self.is_attacking:
             self.time_elapsed += dt
@@ -118,8 +124,8 @@ class Character(pygame.sprite.Sprite):
         self.rect.y += self.velocity.y
 
         # Check If on the Ground
-        if self.rect.bottom >= 300:  # Simulated ground level
-            self.rect.bottom = 300
+        if self.rect.bottom >= ground_level:  # Check against dynamic ground level
+            self.rect.bottom = ground_level
             self.is_jumping = False
             self.velocity.y = 0
 
@@ -129,4 +135,3 @@ class Character(pygame.sprite.Sprite):
             self.time_elapsed = 0
             self.image_index = (self.image_index + 1) % len(self.images)
             self.image = self.images[self.image_index]
-
