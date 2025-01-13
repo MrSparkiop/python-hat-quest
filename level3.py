@@ -6,25 +6,29 @@ def start_level3(screen, player, all_sprites):
     clock = pygame.time.Clock()
     running = True
 
+    # Set the player's position to the far left of the screen
+    player.rect.topleft = (0, screen.get_height() - player.rect.height)
+    all_sprites.add(player)
+
     while running:
-        dt = clock.tick(60) / 1000
+        dt = clock.tick(60) / 1000  # Frame time in seconds
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    action = level_pause_menu(screen)
+                    action = level_pause_menu(screen)  # Open pause menu
                     if action == "resume":
-                        continue
+                        continue  # Resume the game
                     elif action == "leave":
-                        return
+                        return  # Leave the level
 
-        # Update
+        # Update all sprites
         all_sprites.update(pygame.key.get_pressed(), dt)
 
-        # Draw
-        screen.fill((100, 255, 100))  # Green background
+        # Draw everything
+        screen.fill((100, 255, 100))  # Green background for level 3
         all_sprites.draw(screen)
         pygame.display.flip()
 

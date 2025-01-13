@@ -7,7 +7,7 @@ from level2 import start_level2
 from level3 import start_level3
 
 def dialog_screen(screen, text):
-    # Window for dialog
+    """Display dialog box with text."""
     dialog_width = screen.get_width() - 40
     dialog_height = 100
     dialog_x = 20
@@ -23,7 +23,6 @@ def dialog_screen(screen, text):
     screen.blit(text_surface, text_rect)
     pygame.display.flip()
 
-    # Wait for player input to close dialog
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -33,7 +32,7 @@ def dialog_screen(screen, text):
                 return
 
 def option_screen(screen, options):
-    # Options for player to choose
+    """Display options for level selection."""
     screen_width = screen.get_width()
     dialog_height = 150
     dialog_y = screen.get_height() - dialog_height - 20
@@ -55,7 +54,7 @@ def option_screen(screen, options):
         screen.fill(GREEN, pygame.Rect(0, dialog_y, screen_width, dialog_height))
         for button_rect, option in buttons:
             pygame.draw.rect(screen, DARK_GREEN, button_rect)
-            text_surface = font.render(option, True, (0,0,0))
+            text_surface = font.render(option, True, (0, 0, 0))
             text_rect = text_surface.get_rect(center=button_rect.center)
             screen.blit(text_surface, text_rect)
 
@@ -71,8 +70,12 @@ def option_screen(screen, options):
                         return option
 
 def handle_npc_interaction(screen, player, npcs, all_sprites):
+    """Handle interaction with NPCs."""
     for npc in npcs:
         if player.rect.colliderect(npc.rect):
+            # Save the player's current position before dialog starts
+            last_position = player.rect.topleft
+
             dialog_screen(screen, "Hello, adventurer!")
             dialog_screen(screen, "We need your help!")
             dialog_screen(screen, "I will explain later, now...")
@@ -87,3 +90,5 @@ def handle_npc_interaction(screen, player, npcs, all_sprites):
             elif chosen_option == "Level 3":
                 start_level3(screen, player, all_sprites)
 
+            # Restore player's position after leaving the level
+            player.rect.topleft = last_position
