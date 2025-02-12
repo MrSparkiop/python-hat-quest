@@ -31,6 +31,7 @@ class Character(pygame.sprite.Sprite):
         self.jump_force = -10
         self.is_jumping = False
         self.is_attacking = False  # New: Track if currently attacking
+        self.facing_right = True  # ✅ New: Track facing direction
 
     def load_animation(self, filename, frame_count):
         """ Load animation frames correctly from a sprite sheet """
@@ -106,10 +107,12 @@ class Character(pygame.sprite.Sprite):
         # Handle Movement if Not Jumping
         if keys[pygame.K_a]:  # Move left
             self.velocity.x = -self.speed
+            self.facing_right = False  # ✅ Set facing direction
             if not self.is_jumping:
                 self.set_action("Walk")
         elif keys[pygame.K_d]:  # Move right
             self.velocity.x = self.speed
+            self.facing_right = True  # ✅ Set facing direction
             if not self.is_jumping:
                 self.set_action("Walk")
         else:
@@ -134,4 +137,9 @@ class Character(pygame.sprite.Sprite):
         if self.time_elapsed >= self.animation_speed:
             self.time_elapsed = 0
             self.image_index = (self.image_index + 1) % len(self.images)
-            self.image = self.images[self.image_index]
+
+            # ✅ Apply Flipping if Facing Left
+            if not self.facing_right:
+                self.image = pygame.transform.flip(self.images[self.image_index], True, False)
+            else:
+                self.image = self.images[self.image_index]

@@ -1,47 +1,67 @@
 import pygame
 import os
-import random
 from npc import NPC
+from enemy import Enemy  # <--- import your new Enemy class
 
 class Environment:
     def __init__(self, screen):
         self.screen = screen
         self.load_assets()
+
         self.npcs = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
+
         self.add_npcs()
+        self.add_enemies()
 
     def load_assets(self):
-        """Load the background image."""
+        # Load your background image
         asset_folder = os.path.join("Asset", "nature_1")
         self.background = pygame.image.load(os.path.join(asset_folder, "orig.png")).convert()
 
-    def draw(self):
-        """Draw the background and NPCs."""
+    def add_npcs(self):
+        # Example NPC
         screen_width, screen_height = self.screen.get_size()
+        ground_level = screen_height - 100
+        self.npcs.add(NPC((screen_width // 2 + 100, ground_level - 50)))
 
-        # Scale the background to fit the entire screen
+    def add_enemies(self):
+        # Example enemies
+        screen_width, screen_height = self.screen.get_size()
+        ground_level = screen_height - 100
+
+        enemy1 = Enemy((300, ground_level - 50))
+        enemy2 = Enemy((600, ground_level - 50))
+        self.enemies.add(enemy1, enemy2)
+
+    def update(self, dt, player=None):
+        # Update NPCs
+        self.npcs.update(dt)
+
+        # Update Enemies (pass player so they can chase/attack)
+        self.enemies.update(dt, player)
+
+    def draw(self):
+        # Scale background to screen, then draw
+        screen_width, screen_height = self.screen.get_size()
         background_scaled = pygame.transform.scale(self.background, (screen_width, screen_height))
         self.screen.blit(background_scaled, (0, 0))
 
-        # Draw NPCs
+        # Draw NPCs & Enemies
         self.npcs.draw(self.screen)
-
-    def add_npcs(self):
-        """Add NPCs to the environment."""
-        screen_width, screen_height = self.screen.get_size()
-        ground_level = screen_height - 100  # Same ground level as the player
-        self.npcs.add(NPC((screen_width // 2 + 100, ground_level - 50)))
-
-
-    def update(self, dt):
-        """Update NPCs in the environment."""
-        self.npcs.update(dt)
+        self.enemies.draw(self.screen)
 
     def resize(self, new_size):
-        """Handle resizing of the screen and adjust the background and NPCs accordingly."""
         self.npcs.empty()
+        self.enemies.empty()
+
+        # Re-add NPCs and Enemies so they reposition for the new screen size
         self.add_npcs()
+        self.add_enemies()
 
         for npc in self.npcs:
-            npc.rect.bottom = pygame.display.get_surface().get_height() - 100  # Reposition NPC to the new ground level
-            npc.velocity.y = 0  # Reset velocity to prevent falling
+            npc.rect.bottom = pygame.display.get_surface().get_height() - 100
+            npc.velocity.y = 0
+        for enemy in self.enemies:
+            enemy.rect.bottom = pygame.display.get_surface().get_height() - 100
+            enemy.velocity.y = 0

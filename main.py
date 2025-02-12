@@ -48,13 +48,18 @@ def start_game(is_fullscreen):
                 if event.key == pygame.K_e:
                     handle_npc_interaction(screen, player, environment.npcs, all_sprites)
 
-            # Trigger Attack with Left Mouse Button
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left mouse button
-                    player.attack()  # Call the attack method
 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse
+                    player.attack()
+
+                    attack_rect = pygame.Rect(player.rect.centerx - 20, player.rect.y, 40, player.rect.height)
+
+                    for enemy in environment.enemies:
+                        if attack_rect.colliderect(enemy.rect):
+                            enemy.take_damage(1)  # or whichever damage value you prefer
         # Update player and environment
-        environment.update(dt)
+        environment.update(dt, player)
         all_sprites.update(keys, dt)
 
         # Draw everything
