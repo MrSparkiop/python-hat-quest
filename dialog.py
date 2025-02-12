@@ -7,7 +7,7 @@ from level2 import start_level2
 from level3 import start_level3
 
 def dialog_screen(screen, text):
-    """Display dialog box with text."""
+    """Display dialog box with text and allow exiting with Escape key."""
     dialog_width = screen.get_width() - 40
     dialog_height = 100
     dialog_x = 20
@@ -28,11 +28,14 @@ def dialog_screen(screen, text):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:  # Exit dialog immediately
+                    return "exit"
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
-                return
+                return "continue"
 
 def option_screen(screen, options):
-    """Display options for level selection."""
+    """Display options for level selection and allow exiting with Escape key."""
     screen_width = screen.get_width()
     dialog_height = 150
     dialog_y = screen.get_height() - dialog_height - 20
@@ -64,25 +67,38 @@ def option_screen(screen, options):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:  # Exit the option box
+                    return "exit"
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
                 for button_rect, option in buttons:
                     if button_rect.collidepoint(event.pos):
                         return option
 
+
 def handle_npc_interaction(screen, player, npcs, all_sprites):
-    """Handle interaction with NPCs."""
+    """Handle interaction with NPCs and allow exiting dialogs and level selection with Escape."""
     for npc in npcs:
         if player.rect.colliderect(npc.rect):
-            # Save the player's current position before dialog starts
-            last_position = player.rect.topleft
+            last_position = player.rect.topleft  # Save player's position before dialog starts
 
-            dialog_screen(screen, "Hello, adventurer!")
-            dialog_screen(screen, "We need your help!")
-            dialog_screen(screen, "I will explain later, now...")
-            dialog_screen(screen, "Quick!")
-            dialog_screen(screen, "Go through the levels and defeat the BOSS!")
+            # Display dialogs, but break if "exit" is returned
+            if dialog_screen(screen, "Hello, adventurer!") == "exit":
+                return
+            if dialog_screen(screen, "We need your help!") == "exit":
+                return
+            if dialog_screen(screen, "I will explain later, now...") == "exit":
+                return
+            if dialog_screen(screen, "Quick!") == "exit":
+                return
+            if dialog_screen(screen, "Go through the levels and defeat the BOSS!") == "exit":
+                return
 
+            # Show level selection options, but exit if "exit" is returned
             chosen_option = option_screen(screen, ["Level 1", "Level 2", "Level 3"])
+            if chosen_option == "exit":
+                return  # Escape was pressed, return to the game
+
             if chosen_option == "Level 1":
                 start_level1(screen, player, all_sprites)
             elif chosen_option == "Level 2":
@@ -90,5 +106,5 @@ def handle_npc_interaction(screen, player, npcs, all_sprites):
             elif chosen_option == "Level 3":
                 start_level3(screen, player, all_sprites)
 
-            # Restore player's position after leaving the level
+            # Restore player’s position after exiting the level
             player.rect.topleft = last_position
