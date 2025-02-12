@@ -8,6 +8,46 @@ from environment import Environment
 from save_system import save_game, load_game
 from dialog import handle_npc_interaction
 
+def death_screen(screen):
+    """ Display the death screen with a respawn option """
+    font = pygame.font.Font(None, 80)
+    button_font = pygame.font.Font(None, 50)
+
+    screen_width, screen_height = screen.get_size()
+    title_text = font.render("You Died!", True, (255, 0, 0))
+    title_rect = title_text.get_rect(center=(screen_width // 2, screen_height // 3))
+
+    # Buttons
+    respawn_button = pygame.Rect(screen_width // 2 - 100, screen_height // 2, 200, 50)
+    exit_button = pygame.Rect(screen_width // 2 - 100, screen_height // 2 + 80, 200, 50)
+
+    while True:
+        screen.fill((0, 0, 0))  # Black background
+        screen.blit(title_text, title_rect)
+
+        # Draw buttons
+        pygame.draw.rect(screen, (100, 100, 100), respawn_button)
+        pygame.draw.rect(screen, (100, 100, 100), exit_button)
+
+        respawn_text = button_font.render("Respawn", True, (255, 255, 255))
+        exit_text = button_font.render("Exit", True, (255, 255, 255))
+
+        screen.blit(respawn_text, respawn_button.move(50, 10))
+        screen.blit(exit_text, exit_button.move(70, 10))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if respawn_button.collidepoint(event.pos):
+                    return "respawn"  # ✅ Restart the level
+                if exit_button.collidepoint(event.pos):
+                    pygame.quit()
+                    sys.exit()
+
 def start_game(is_fullscreen):
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Game Environment Demo")
@@ -48,7 +88,6 @@ def start_game(is_fullscreen):
                 if event.key == pygame.K_e:
                     handle_npc_interaction(screen, player, environment.npcs, all_sprites)
 
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:  # Left mouse
                     player.attack()
@@ -58,6 +97,17 @@ def start_game(is_fullscreen):
                     for enemy in environment.enemies:
                         if attack_rect.colliderect(enemy.rect):
                             enemy.take_damage(1)  # or whichever damage value you prefer
+
+        # ✅ Check if Player Died
+        if player.health <= 0:
+            action = death_screen(screen)  # Show death screen
+            if action == "respawn":
+                # ✅ Reset Player's Health & Position
+                player.health = player.max_health
+                player.is_dead = False
+                player.rect.topleft = (screen.get_width() // 2 - 100, screen.get_height() - 100)
+                player.set_action("Idle")
+
         # Update player and environment
         environment.update(dt, player)
         all_sprites.update(keys, dt)
