@@ -25,7 +25,7 @@ class Enemy(pygame.sprite.Sprite):
         # Position
         self.rect = self.image.get_rect(topleft=position)
 
-        # ✅ Health & States
+        # Health & States
         self.max_health = 3
         self.health = self.max_health
         self.is_hurt = False
@@ -155,12 +155,10 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x += self.velocity.x
 
     def process_attack_logic(self, player):
-        """ Enemy attacks the player when in range """
-        if self.state == "attack":
-            if self.facing_right:
-                attack_rect = pygame.Rect(self.rect.right - 10, self.rect.y, 40, self.rect.height)
-            else:
-                attack_rect = pygame.Rect(self.rect.left - 30, self.rect.y, 40, self.rect.height)
+        """ Attack player if in range but NOT immediately after respawn """
+        if self.state == "attack" and player.health > 0 and player.respawn_invulnerability_timer <= 0:
+            attack_rect = pygame.Rect(self.rect.right - 10, self.rect.y, 40, self.rect.height) if self.facing_right else \
+                pygame.Rect(self.rect.left - 30, self.rect.y, 40, self.rect.height)
 
             if attack_rect.colliderect(player.rect):
                 player.take_damage(1)

@@ -1,6 +1,49 @@
 import pygame
 import sys
 
+
+
+
+def death_screen(screen):
+    """ Show a death screen with a respawn option """
+    font = pygame.font.Font(None, 74)
+    button_font = pygame.font.Font(None, 50)
+
+    RED = (200, 0, 0)
+    DARK_RED = (150, 0, 0)
+    WHITE = (255, 255, 255)
+
+    screen_width, screen_height = screen.get_size()
+
+    button_width, button_height = 200, 60
+    button_x = (screen_width - button_width) // 2
+    button_y = screen_height // 2 + 50
+    respawn_button = pygame.Rect(button_x, button_y, button_width, button_height)
+
+    while True:
+        screen.fill(RED)
+        text_surface = font.render("You Died", True, WHITE)
+        screen.blit(text_surface, (screen_width // 2 - 100, screen_height // 3))
+
+        pygame.draw.rect(screen, DARK_RED, respawn_button)
+        respawn_text = button_font.render("Respawn", True, WHITE)
+        screen.blit(respawn_text, (button_x + 40, button_y + 10))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if respawn_button.collidepoint(event.pos):
+                    return "respawn"
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return "exit"
+
 # colors
 LIGHT_GREEN = (184, 195, 136)
 DARK_GREEN = (76, 107, 91)
