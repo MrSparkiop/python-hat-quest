@@ -5,14 +5,13 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, position):
         super().__init__()
         self.animations = {
-            "Idle":    self.load_animation("Idle.png", 7),
-            "Walk":    self.load_animation("Walk.png", 8),
-            "Attack":  self.load_animation("Attack_1.png", 7),
-            "Hurt":    self.load_animation("Hurt.png", 3),
-            "Death":   self.load_animation("Dead.png", 3),
+            "Idle": self.load_animation("Idle.png", 7),
+            "Walk": self.load_animation("Walk.png", 8),
+            "Attack": self.load_animation("Attack_1.png", 7),
+            "Hurt": self.load_animation("Hurt.png", 3),
+            "Death": self.load_animation("Dead.png", 3),
         }
 
-        # Default animation setup
         self.current_action = "Idle"
         self.images = self.animations[self.current_action]
         self.image_index = 0
@@ -97,6 +96,21 @@ class Enemy(pygame.sprite.Sprite):
             self.is_hurt = True
             self.set_action("Hurt")
             self.hurt_timer = 0.5
+
+    def draw_health_bar(self, screen):
+        """ Draw a health bar above the enemy """
+        if self.health > 0:
+            bar_width = 50
+            bar_height = 5
+            health_ratio = max(self.health / self.max_health, 0)
+            health_length = int(bar_width * health_ratio)
+
+            # Position the health bar above the enemy
+            bar_x = self.rect.centerx - bar_width // 2
+            bar_y = self.rect.top - 10  # Slightly above the enemy
+
+            pygame.draw.rect(screen, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))  # Background
+            pygame.draw.rect(screen, (255, 0, 0), (bar_x, bar_y, health_length, bar_height))  # Red Health
 
     def update_ai(self, dt, player):
         """ Enemy behavior: patrol, chase, attack """

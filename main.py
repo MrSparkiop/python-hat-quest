@@ -8,8 +8,28 @@ from environment import Environment
 from save_system import save_game, load_game
 from dialog import handle_npc_interaction
 
+
+def draw_health_bar(screen, x, y, health, max_health, bar_width=200, bar_height=20):
+    """ Draw the player's health bar """
+    border_color = (0, 0, 0)
+    background_color = (100, 100, 100)
+    health_color = (255, 0, 0)  # Red health bar
+
+    # Calculate health bar length
+    health_ratio = max(health / max_health, 0)
+    health_length = int(bar_width * health_ratio)
+
+    # Draw health bar background and border
+    pygame.draw.rect(screen, background_color, (x, y, bar_width, bar_height))
+    pygame.draw.rect(screen, border_color, (x, y, bar_width, bar_height), 2)
+
+    # Draw actual health bar
+    pygame.draw.rect(screen, health_color, (x, y, health_length, bar_height))
+
+
 def start_game(is_fullscreen):
-    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode(
+        (800, 600))
     pygame.display.set_caption("Game Environment Demo")
 
     clock = pygame.time.Clock()
@@ -41,7 +61,8 @@ def start_game(is_fullscreen):
                     elif action == "options":
                         is_fullscreen = options_menu(screen, is_fullscreen)
                         screen = pygame.display.set_mode((0, 0),
-                                                         pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode((800, 600))
+                                                         pygame.FULLSCREEN) if is_fullscreen else pygame.display.set_mode(
+                            (800, 600))
                     elif action == "exit":
                         save_game({"player_position": player.rect.topleft})
                         return
@@ -57,7 +78,7 @@ def start_game(is_fullscreen):
                         if attack_rect.colliderect(enemy.rect):
                             enemy.take_damage(1)
 
-        #  Check if Player Died
+        # Check if Player Died
         if player.health <= 0:
             action = death_screen(screen)
             if action == "respawn":
@@ -77,10 +98,15 @@ def start_game(is_fullscreen):
         screen.fill((50, 50, 50))
         environment.draw()
         all_sprites.draw(screen)
+
+        # ✅ Draw Player's Health Bar
+        draw_health_bar(screen, 20, 20, player.health, player.max_health)
+
         pygame.display.flip()
 
     pygame.quit()
     sys.exit()
+
 
 if __name__ == "__main__":
     main_menu(start_game)
