@@ -2,8 +2,6 @@ import pygame
 import sys
 
 
-
-
 def death_screen(screen):
     """ Show a death screen with a respawn option """
     font = pygame.font.Font(None, 74)

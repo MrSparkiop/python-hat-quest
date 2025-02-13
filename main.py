@@ -99,7 +99,7 @@ def start_game(is_fullscreen):
         environment.draw()
         all_sprites.draw(screen)
 
-        # ✅ Draw Player's Health Bar
+        # Draw Player's Health Bar
         draw_health_bar(screen, 20, 20, player.health, player.max_health)
 
         pygame.display.flip()

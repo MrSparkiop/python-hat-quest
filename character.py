@@ -96,7 +96,7 @@ class Character(pygame.sprite.Sprite):
         screen_height = pygame.display.get_surface().get_height()
         ground_level = screen_height - 100
 
-        # ✅ Apply invulnerability blinking ONLY if recently respawned
+        # Apply invulnerability blinking ONLY if recently respawned
         if self.respawn_invulnerability_timer > 0:
             self.respawn_invulnerability_timer -= dt
 
@@ -104,7 +104,7 @@ class Character(pygame.sprite.Sprite):
                 self.respawn_invulnerability_timer = 0
                 self.image.set_alpha(255)  # Fully reset player visibility
             else:
-                # ✅ Blink effect only while invulnerable
+                # Blink effect only while invulnerable
                 if int(self.respawn_invulnerability_timer * 10) % 2 == 0:
                     self.image.set_alpha(100)
                 else:
