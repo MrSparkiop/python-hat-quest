@@ -5,11 +5,11 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, position):
         super().__init__()
         self.animations = {
-            "Idle": self.load_animation("Idle.png", 7),
-            "Walk": self.load_animation("Walk.png", 8),
+            "Idle":   self.load_animation("Idle.png", 7),
+            "Walk":   self.load_animation("Walk.png", 8),
             "Attack": self.load_animation("Attack_1.png", 7),
-            "Hurt": self.load_animation("Hurt.png", 3),
-            "Death": self.load_animation("Dead.png", 3),
+            "Hurt":   self.load_animation("Hurt.png", 3),
+            "Death":  self.load_animation("Dead.png", 3),
         }
 
         self.current_action = "Idle"
@@ -71,14 +71,8 @@ class Enemy(pygame.sprite.Sprite):
             self.image = self.original_frame
 
     def apply_gravity(self):
-        """ Apply gravity until hitting the ground. """
-        screen_height = pygame.display.get_surface().get_height()
-        ground_level = screen_height - 100
-        if self.rect.bottom < ground_level:
-            self.velocity.y += self.gravity
-        else:
-            self.rect.bottom = ground_level
-            self.velocity.y = 0
+        """ Let the main loop or platform collision handle final snap to ground if needed. """
+        self.velocity.y += self.gravity
 
     def take_damage(self, damage):
         """ Enemy takes damage and plays Hurt or Death animation. """
@@ -86,7 +80,6 @@ class Enemy(pygame.sprite.Sprite):
             return
 
         self.health -= damage
-
         if self.health <= 0:
             self.health = 0
             self.is_dead = True
@@ -105,15 +98,14 @@ class Enemy(pygame.sprite.Sprite):
             health_ratio = max(self.health / self.max_health, 0)
             health_length = int(bar_width * health_ratio)
 
-            # Position the health bar above the enemy
             bar_x = self.rect.centerx - bar_width // 2
-            bar_y = self.rect.top - 10  # Slightly above the enemy
+            bar_y = self.rect.top - 10
 
-            pygame.draw.rect(screen, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))  # Background
-            pygame.draw.rect(screen, (255, 0, 0), (bar_x, bar_y, health_length, bar_height))  # Red Health
+            pygame.draw.rect(screen, (100, 100, 100), (bar_x, bar_y, bar_width, bar_height))
+            pygame.draw.rect(screen, (255, 0, 0), (bar_x, bar_y, health_length, bar_height))
 
     def update_ai(self, dt, player):
-        """ Enemy behavior: patrol, chase, attack """
+        """ Enemy behavior: patrol, chase, or attack. """
         if self.is_dead:
             return
 
@@ -128,12 +120,13 @@ class Enemy(pygame.sprite.Sprite):
         distance_to_player = player.rect.centerx - self.rect.centerx
         distance_abs = abs(distance_to_player)
 
-        if self.state in ("idle", "patrol", "chase"):
-            if distance_to_player > 5:
-                self.facing_right = True
-            elif distance_to_player < -5:
-                self.facing_right = False
+        # Determine facing direction
+        if distance_to_player > 5:
+            self.facing_right = True
+        elif distance_to_player < -5:
+            self.facing_right = False
 
+        # Attack if in range
         if distance_abs < self.attack_range:
             if self.attack_timer <= 0:
                 self.state = "attack"
@@ -144,14 +137,16 @@ class Enemy(pygame.sprite.Sprite):
                     self.state = "idle"
                     self.set_action("Idle")
         elif distance_abs < 300:
+            # chase
             self.state = "chase"
             self.set_action("Walk")
         else:
+            # patrol
             self.state = "patrol"
             self.set_action("Walk")
 
     def do_movement(self, dt):
-        """ Moves the enemy depending on its state """
+        """ Move enemy according to AI state. """
         if self.is_dead:
             return
 
@@ -160,7 +155,6 @@ class Enemy(pygame.sprite.Sprite):
             self.velocity.x = direction * self.move_speed * dt
         elif self.state == "patrol":
             self.velocity.x = self.patrol_direction * self.move_speed * dt
-
             if abs(self.rect.x - self.patrol_start_x) > self.patrol_range:
                 self.patrol_direction *= -1
         else:
@@ -169,16 +163,18 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x += self.velocity.x
 
     def process_attack_logic(self, player):
-        """ Attack player if in range but NOT immediately after respawn """
+        """ Attack player if in range (and not invulnerable). """
         if self.state == "attack" and player.health > 0 and player.respawn_invulnerability_timer <= 0:
-            attack_rect = pygame.Rect(self.rect.right - 10, self.rect.y, 40, self.rect.height) if self.facing_right else \
-                pygame.Rect(self.rect.left - 30, self.rect.y, 40, self.rect.height)
+            if self.facing_right:
+                attack_rect = pygame.Rect(self.rect.right - 10, self.rect.y, 40, self.rect.height)
+            else:
+                attack_rect = pygame.Rect(self.rect.left - 30, self.rect.y, 40, self.rect.height)
 
             if attack_rect.colliderect(player.rect):
                 player.take_damage(1)
 
     def update(self, dt, player=None):
-        """ Main update function: gravity, AI, movement, attack, animation """
+        """ Main update: gravity, AI, movement, attacking, animations. """
         self.apply_gravity()
 
         if self.attack_timer > 0:
@@ -189,24 +185,30 @@ class Enemy(pygame.sprite.Sprite):
             self.do_movement(dt)
             self.process_attack_logic(player)
 
+        # Animate
         self.time_elapsed += dt
         if self.time_elapsed >= self.animation_speed:
             self.time_elapsed = 0
             self.image_index = (self.image_index + 1) % len(self.images)
             self.original_frame = self.images[self.image_index]
 
+            # If finishing an animation
             if self.image_index == 0:
+                # End of Hurt?
                 if self.current_action == "Hurt" and self.is_hurt:
                     self.is_hurt = False
                     self.state = "idle"
                     self.set_action("Idle")
+                # End of Attack?
                 elif self.current_action == "Attack" and self.state == "attack":
                     self.state = "idle"
                     self.set_action("Idle")
 
+            # If Death animation finishes, remove sprite
             if self.current_action == "Death" and self.image_index == len(self.images) - 1:
                 self.kill()
 
+        # Flip image if facing left
         if self.facing_right:
             self.image = self.original_frame
         else:
